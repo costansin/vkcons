@@ -1011,6 +1011,7 @@ def check_inbox():
                                         for xid in xfeedlist: printsn(name_from_id(xid.get('from_id')))
                                 xfeedbacktext = xfeedback.get('text')
                                 if xfeedbacktext: printsn('»»\n' + charfilter(xfeedbacktext))
+                                print_attachments(xfeedback.get('attachments',[]))
                         printsn(printtime(xdate))
                         if not looping: printms()
         token_num = prev_token_num
