@@ -1004,13 +1004,13 @@ def check_inbox():
                                 xowner = xparent.get('to_id')
                                 if xowner is None: xowner = xparent.get('owner_id')
                                 printsn(prextype.replace('post','wall')+str(xowner)+'_'+str(xparent.get('id'))+comment_id)
-                                if xparenttext: printsn(xparenttext[:140]+'<..>'*int(len(xparenttext)>140)+'\n')
+                                if xparenttext: printsn(charfilter(xparenttext[:140])+'<..>'*int(len(xparenttext)>140)+'\n')
                         if xfeedback:
                                 xfeedlist = xfeedback.get('items')
                                 if xfeedlist:
                                         for xid in xfeedlist: printsn(name_from_id(xid.get('from_id')))
                                 xfeedbacktext = xfeedback.get('text')
-                                if xfeedbacktext: printsn('»»\n' + xfeedbacktext)
+                                if xfeedbacktext: printsn('»»\n' + charfilter(xfeedbacktext))
                         printsn(printtime(xdate))
                         if not looping: printms()
         token_num = prev_token_num
