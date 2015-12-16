@@ -1007,8 +1007,8 @@ def check_inbox():
                                 if xparenttext: printsn(charfilter(xparenttext[:140])+'<..>'*int(len(xparenttext)>140)+'\n')
                         if xfeedback:
                                 xfeedlist = xfeedback.get('items')
-                                if xfeedlist:
-                                        for xid in xfeedlist: printsn(name_from_id(xid.get('from_id')))
+                                if not xfeedlist: xfeedlist = [xfeedback]
+                                for xid in xfeedlist: printsn(name_from_id(xid.get('from_id')))
                                 xfeedbacktext = xfeedback.get('text')
                                 if xfeedbacktext: printsn('»»\n' + charfilter(xfeedbacktext))
                                 print_attachments(xfeedback.get('attachments',[]))
