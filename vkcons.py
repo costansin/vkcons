@@ -27,7 +27,8 @@ def call_api(method, params):
         if method[:7]=='http://':
                 q = method.find('?')
                 url = method[:q]
-                files = {'photo': ('file.png', open(params, 'rb'))}
+                if 'act=add_doc' in method: files = {'file': ('file'+params[params.rfind('.'):], open(params, 'rb'))}
+                else: files = {'photo': ('file.png', open(params, 'rb'))}
                 params = {} #dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(method[q+1:]).query))
                 for query in method[q+1:].split('&'):
                         v = query.split('=')
@@ -302,6 +303,7 @@ def messaging():
                                         return(0)
                                 def r(c): return l(s)==c
                                 if r(">") or r("<"):
+                                        fs = '\n'+s
                                         repeated = r("<")
                                         nowstamp = datetime.datetime.fromtimestamp(time.time())
                                         s = cin()
@@ -311,22 +313,19 @@ def messaging():
                                                 return(0)
                                         if repeated:
                                                 try: delay_period = float(s)
-                                                except:
-                                                        m = '\n<\n'+s
-                                                        continue
-                                                delay_time = time.time()+delay_period
+                                                except: m = fs
+                                                else: delay_time = time.time()+delay_period
                                         else:
                                                 try: delay_time = time.mktime(datetime.datetime.strptime(s, "%H:%M:%S %d.%m.%Y").timetuple())
-                                                except:
-                                                        m = '\n<\n'+s
-                                                        continue
-                                        s = cin()
-                                        if s is None: return(0)
-                                        if not r("{"):
-                                                block.append(s)
-                                                if repeated: block.extend(['<', str(delay_period), s])
-                                                add_delayed(delay_time)
-                                                return(0)
+                                                except: m = fs
+                                        if not m:
+                                                s = cin()
+                                                if s is None: return(0)
+                                                if not r("{"):
+                                                        block.append(s)
+                                                        if repeated: block.extend(['<', str(delay_period), s])
+                                                        add_delayed(delay_time)
+                                                        return(0)
                                 if r("{"):
                                         bracket_counter = 1
                                         s = cin()
@@ -362,20 +361,25 @@ def messaging():
                                                 return(0)
                                         if r("u"): uploades = ['photos.getMessagesUploadServer', 'photos.saveMessagesPhoto']
                                         elif r("w"): uploades = ['photos.getWallUploadServer', 'photos.saveWallPhoto']
+                                        elif r("du"): uploades = ['docs.getUploadServer', 'docs.save']
+                                        elif r("dw"): uploades = ['docs.getWallUploadServer', 'docs.save']
                                         else: uploades = None
                                         if uploades:
+                                                up_doc = int(s[0]=='d')
                                                 s = cin()
                                                 if s is None: return(0)
                                                 if s.strip()=='': s='Безымянный.png'
                                                 upload_url = call_api(uploades[0], {})
                                                 if upload_url: upload_stuff = call_api(upload_url.get('upload_url'), s)
                                                 else: return(0)
-                                                if upload_stuff: uploaded_photo = call_api(uploades[1], upload_stuff)      
+                                                if upload_stuff: uploaded = call_api(uploades[1], upload_stuff)      
                                                 else: return(0)
-                                                if uploaded_photo: s = 'photo'+str(uploaded_photo[0].get('owner_id'))+'_'+str(uploaded_photo[0].get('id'))
+                                                if uploaded: s = ['photo','doc'][up_doc]+str(uploaded[0].get('owner_id'))+'_'+str(uploaded[0].get('id'))
                                                 print('\n'+s)
                                         if s[0].isdigit(): forward_messages += ','+s
-                                        elif l(s[0])=='s': subject = s[2:] #s_The subject of my message
+                                        elif l(s[0])=='s': 
+                                                subject = s[2:] #s_The subject of my message
+                                                print('The subject is "'+s[2:]+'"\nThe subject is not seen in history output of the script, but seen in bold in dialogs in a browser')
                                         else: attachments += ','+s
                                         continue
                                 if r("~") or r("`"):
@@ -737,6 +741,7 @@ def messaging():
                                                 if info: print(info.get('type'), info.get('object_id'))
                                         return(0)
                                 elif r("f"):
+                                        fs = '\n'+s
                                         s = cin()
                                         if s is None: return(0)
                                         if r("?"):
@@ -744,18 +749,22 @@ def messaging():
                                                 return(0)
                                         friend_id_list = None
                                         if s=='': friend_id_list = call_api('friends.getRecent', {'count': 1000})
-                                        elif l(s)=='<' or l(s)==',': friend_id_list = call_api('friends.getRequests', {'count': 1000, 'out': 1})
-                                        elif l(s)=='>' or l(s)=='.': friend_id_list = call_api('friends.getRequests', {'count': 1000, 'out': 0})
-                                        elif l(s)=='f':
+                                        elif r("<") or r(","): friend_id_list = call_api('friends.getRequests', {'count': 1000, 'out': 1})
+                                        elif r(">") or r("."): friend_id_list = call_api('friends.getRequests', {'count': 1000, 'out': 0})
+                                        elif r("f"):
                                                 s = cin()
                                                 if s is None: return(0)
                                                 t = mn(s)
                                                 friend_id_list = call_api('groups.getMembers', {'group_id': -t, 'count': 1000, 'sort': 'time_desc'}) if t<0 else call_api('friends.get', {'user_id': t, 'count': 1000})
-                                        if friend_id_list is not None: print_id_list(friend_id_list)
+                                        if friend_id_list is not None:
+                                                print_id_list(friend_id_list)
+                                                return(0)
                                         else:
                                                 suserid = mn(s)
-                                                print(call_api('groups.join', {'group_id': -suserid}) if suserid<0 else call_api('friends.add', {'user_id': suserid})) #domain unavailable
-                                        return(0)
+                                                if suserid is None: m = fs
+                                                else:
+                                                        print(call_api('groups.join', {'group_id': -suserid}) if suserid<0 else call_api('friends.add', {'user_id': suserid})) #domain unavailable
+                                                        return(0)
                                 elif r("b"): #makes you online!
                                         wall_flag = True
                                         userid = 0
@@ -824,7 +833,7 @@ def messaging():
                                         s = cin()
                                         if s is None: return(0)
                                         if r("?"):
-                                                print("deleting messages (e.g. 5123,5124,5653)\nor a wall post (e.g. [[https://vk.com/]wall]-2424_2123).\ntype anything instead 'Y' for the confirmation request and edit the wall post\ntry to delete non-existing post to make an attempt to restore it")
+                                                print("deleting\restoring messages (e.g. 5123,5124,5653)\nor a wall post (e.g. [[https://vk.com/]wall]-2424_2123).\ntype anything instead 'Y' for the confirmation request and edit the wall post\ntry to delete non-existing post to make an attempt to restore it")
                                                 return(0)
                                         dwall = '_' in s
                                         if dwall:
@@ -845,9 +854,10 @@ def messaging():
                                                 if api_call: delete_list = api_call.get('items')
                                                 else: return(0)
                                                 printm = ''
-                                                for mes in delete_list:                                                        
-                                                        del_uid = str(mes.get('user_id'))
-                                                        printsn('>'+del_uid if (mes.get('out')==0) else '<'+del_uid)
+                                                for mes in delete_list:
+                                                        deleted = bool(mes.get('deleted'))
+                                                        printsn('<>'[int(mes.get('out')==0)]+'[is now restored]'*int(deleted)+' ' + name_from_id(mes.get('user_id')))
+                                                        if deleted: call_api('messages.restore', {'message_id': mes.get('id')})
                                                         print_message('', mes, 0)                                        
                                         printms()
                                         print('DELETE THAT?\nY\\N')
