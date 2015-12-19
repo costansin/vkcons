@@ -310,9 +310,16 @@ def messaging():
                                                 print('input a period of time in seconds (can be float)' if repeated else nowstamp.strftime('input time in format 18:00:00 %d.%m.%Y'))
                                                 return(0)
                                         if repeated:
-                                                delay_period = float(s)
+                                                try: delay_period = float(s)
+                                                except:
+                                                        m = '\n<\n'+s
+                                                        continue
                                                 delay_time = time.time()+delay_period
-                                        else: delay_time = time.mktime(datetime.datetime.strptime(s, "%H:%M:%S %d.%m.%Y").timetuple())
+                                        else:
+                                                try: delay_time = time.mktime(datetime.datetime.strptime(s, "%H:%M:%S %d.%m.%Y").timetuple())
+                                                except:
+                                                        m = '\n<\n'+s
+                                                        continue
                                         s = cin()
                                         if s is None: return(0)
                                         if not r("{"):
@@ -432,13 +439,20 @@ def messaging():
                                                 print_attachments(post.get('attachments', []))
                                                 printsn('\nSUGGEST\n____' if post.get('post_type')=='suggest' else '\n'+str(post.get('likes').get('count'))+' likes, '+str(post.get('comments').get('count'))+' comments\n____')
                                         if len(wall)==1:
-                                                printsn('COMMENTS:')
-                                                wallcomments = get_long_list('wall.getComments', {'owner_id': wowner, 'post_id': wid, 'need_likes': 1},INFINITY,W_OFFSET_CONSTANT)
-                                                for comment in wallcomments:
-                                                        printsn('wall'+wowner+'_'+wid+'?reply='+str(comment.get('id'))+'\n'+name_from_id(comment.get('from_id'))+'\n\n'+charfilter(comment.get('text')))
-                                                        print_attachments(comment.get('attachments', []))
-                                                        printsn('\n'+str(comment.get('likes').get('count'))+' likes')
-                                                        printsn('____')
+                                                com_num = post.get('comments').get('count')
+                                                if com_num>30:
+                                                        print('Download ' + str(com_num) + ' comments? Y / N / S - to sort them in like-order')
+                                                        s = cin()
+                                                        if s is None: return(0)
+                                                if r("y") or r("s"):
+                                                        printsn('COMMENTS:')
+                                                        wallcomments = get_long_list('wall.getComments', {'owner_id': wowner, 'post_id': wid, 'need_likes': 1},INFINITY,W_OFFSET_CONSTANT)
+                                                        if r("s"): wallcomments.sort(key=lambda comment: comment.get('likes').get('count'))
+                                                        for comment in wallcomments:
+                                                                printsn('wall'+wowner+'_'+wid+'?reply='+str(comment.get('id'))+'\n'+name_from_id(comment.get('from_id'))+'\n\n'+charfilter(comment.get('text')))
+                                                                print_attachments(comment.get('attachments', []))
+                                                                printsn('\n'+str(comment.get('likes').get('count'))+' likes')
+                                                                printsn('____')
                                         printms()
                                         return(0)
                                 elif r(":"):
@@ -716,10 +730,10 @@ def messaging():
                                                         if actif:
                                                                 onstatus = 'online' if actif.get('online') else 'offline'
                                                                 print(onstatus, printtime(actif.get('time')))
+                                                        print("now it's " + printtime(time.time())+"\nhttps://vk.com/albums"+str(info[0].get('id')))
                                         else:
                                                 info = call_api('utils.resolveScreenName', {'screen_name': suserid})
                                                 if info: print(info.get('type'), info.get('object_id'))
-                                        print("now it's " + printtime(time.time())+"\nhttps://vk.com/albums"+str(suserid))
                                         return(0)
                                 elif r("f"):
                                         s = cin()
