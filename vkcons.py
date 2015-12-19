@@ -1,8 +1,8 @@
 # -*- coding: utf-8
 import requests, time, datetime, ast, os, re, random, bisect, argparse
 from tkinter import *
-sleepTime, waitTime = 0.34, 53
-INFINITY, AU_OFFSET_CONSTANT, HI_OFFSET_CONSTANT, W_OFFSET_CONSTANT, L_OFFSET_CONSTANT, LF_OFFSET_CONSTANT, mnemofile, ignorefile, tokenfile, raspyafile, cachefile, headerfile, delayfile, looping, photosizes, printm, width, height, mnemonics, ignore, header, idscache, uidscache, lastNviewcache, prob, token_num, block, delayed, full_auth_line = 10000000, 300, 200, 100, 1000, 100, 'mnemo.txt', 'ignore.txt', 'tokens.txt', 'rasp.ya.txt', 'cache.txt', 'header.txt', 'delay.txt', False, [2560, 1280, 807, 604, 512, 352, 256, 130, 128, 100, 75, 64], '', 0, 0, {}, [], {}, [], {}, [], [], 0, [], [], 'https://oauth.vk.com/authorize?client_id=5015702&scope=notify,friends,photos,audio,video,docs,notes,pages,status,offers,questions,wall,groups,messages,notifications,stats,ads,offline&redirect_uri=https://oauth.vk.com/blank.html&display=page&response_type=token'
+sleepTime, waitTime, TOO_LONG_CONSTANT  = 0.34, 53, 500
+INFINITY, AU_OFFSET_CONSTANT, HI_OFFSET_CONSTANT, W_OFFSET_CONSTANT, L_OFFSET_CONSTANT, LF_OFFSET_CONSTANT, mnemofile, ignorefile, tokenfile, raspyafile, cachefile, headerfile, delayfile, looping, photosizes, printm, width, height, mnemonics, ignore, header, idscache, uidscache, lastNviewcache, prob, token_num, block, delayed, full_auth_line = 10000000, 300, 200, 100, 1000, 100, 'mnemo.txt', 'ignore.txt', 'tokens.txt', 'rasp.ya.txt', 'cache.txt', 'header.txt', 'delay.txt', False, [2560, 1280, 807, 604, 512, 352, 256, 130, 128, 100, 75, 64], '', 0, 0, {}, [], {}, [], {}, [], [], 0, [], [], 'https://oauth.vk.com/authorize?client_id=5193865&scope=notify,friends,photos,audio,video,docs,notes,pages,status,offers,questions,wall,groups,messages,notifications,stats,ads,offline&redirect_uri=https://oauth.vk.com/blank.html&display=page&response_type=token'
 simple_smileys={128522: ':-)', 128515: ':-D', 128521: ';-)', 128518: 'xD', 128540: ';-P', 128523: ':-p', 128525: '8-)', 128526: 'B-)', 128530: ':-(', 128527: ';-]', 128532: '3(', 128546: ":'(", 128557: ':_(', 128553: ':((', 128552: ':o', 128528: ':|',128524: '3-)', 128519: 'O:)', 128560: ';o', 128562: '8o', 128563: '8|', 128567: ':X', 10084: '<3', 128538: ':-*', 128544: '>(', 128545: '>((', 9786: ':-]', 128520: '}:)', 128077: ':like:', 128078: ':dislike:', 9757: ':up:', 9996: ':v:', 128076: ':ok:'}
 rev_simple_smileys={':-)': 'D83DDE0A.png', ':-D': 'D83DDE03.png', ';-)': 'D83DDE09.png', 'xD': 'D83DDE06.png', ';-P': 'D83DDE1C.png', ':-p': 'D83DDE0B.png', '8-)': 'D83DDE0D.png', 'B-)': 'D83DDE0E.png', ':-(': 'D83DDE12.png', ';-]': 'D83DDE0F.png', '3(': 'D83DDE14.png', ":'(": 'D83DDE22.png', ':_(': 'D83DDE2D.png', ':((': 'D83DDE29.png', ':o': 'D83DDE28.png', ':|': 'D83DDE10.png', '3-)': 'D83DDE0C.png', 'O:)': 'D83DDE07.png', ';o': 'D83DDE30.png', '8o': 'D83DDE32.png', '8|': 'D83DDE33.png', ':X': 'D83DDE37.png', '<3': '2764.png', ':-*': 'D83DDE1A.png', '>(': 'D83DDE20.png', '>((': 'D83DDE21.png', ':-]': '263A.png', '}:)': 'D83DDE08.png', ':like:': 'D83DDC4D.png', ':dislike:': 'D83DDC4E.png', ':up:': '261D.png', ':v:': '270C.png', ':ok:': 'D83DDC4C.png'}
 smiley = re.compile('|'.join([re.escape(sm) for sm in rev_simple_smileys])+r'|\d+') #warning: all numbers are smileys!
@@ -69,10 +69,10 @@ def reset():
         global token_num, idscache, uidscache, lastNviewcache, prob, prevuserid, token_list
         idscache, uidscache, lastNviewcache, prob = [], {}, [], []
         if not token_list:
-                print(full_auth_line+'\n\n\nauthorisation token needed\nplease insert that in your browser and do what it interdicts\ni strongly promiss not to steal your profile\nactually, i cannot :(\n')
+                print(full_auth_line+'\n\n\nauthorisation token needed\nplease insert that in your browser, press Allow and do what it strongly prohibits: copypaste the adress line in here\nif you suspect me or something, just check the code you are using.')
                 s = cin()
                 if s is None:
-                        print("c'mon, i AM really a good guy")
+                        print("c'mon, dont you believe me? if i had made some backdoors, someone would have found them!")
                         s = cin()
                         if s is None:
                                 raise PermissionError ('Lack of trust error')
@@ -440,7 +440,7 @@ def messaging():
                                                 printsn('\nSUGGEST\n____' if post.get('post_type')=='suggest' else '\n'+str(post.get('likes').get('count'))+' likes, '+str(post.get('comments').get('count'))+' comments\n____')
                                         if len(wall)==1:
                                                 com_num = post.get('comments').get('count')
-                                                if com_num>30:
+                                                if com_num>10:
                                                         print('Download ' + str(com_num) + ' comments? Y / N / S - to sort them in like-order')
                                                         s = cin()
                                                         if s is None: return(0)
@@ -620,16 +620,17 @@ def messaging():
                                                 print("photo123123_123123 or audio1231231_12213 or video2123_123123 or http://vk.com/video_ext.php?oid=...")
                                                 return(0)
                                         if 'video_ext' not in s: return(0)
-                                        x = requests.get('https://vk.com/'+s).text
+                                        if 'http://vk.com/' not in s: s = 'http://vk.com/'+s
+                                        x = requests.get(s).text
                                         if 'Видеозапись была помечена модераторами сайта как «Материал для взрослых». Такие видеозаписи запрещено встраивать на внешние сайты.' in x:
                                                 print('Adult content error')
                                                 return(0)
                                         xd = x.find('video_max_hd = ')
-                                        try: video_max_hd = int(x[xd+16:xd+17])
+                                        try: video_max_hd = int(x[xd+16])
                                         except: video_max_hd = 0
                                         hds = ['240', '360', '480', '720', '1080']
-                                        video_url = x[x.find('url'+hds[video_max_hd])+7:]
-                                        video_url = video_url[:video_url.find('&amp;')]
+                                        vurlfind = x.find('url'+hds[video_max_hd])+7
+                                        video_url = x[vurlfind:x.find('&amp;', vurlfind)]
                                         print(video_url)                        
                                         return(0)
                                 elif r("a"):
@@ -871,9 +872,8 @@ def messaging():
                                         r.encoding = 'UTF-8'
                                         x = r.text
                                         p = x.find('Поздравляем') #region = re.findall(r'Регион.*?\<\/li\>', x)
-                                        inf = x[p:p+200] #if region is not None: print(region[0][:-12].replace('</div><span class="data__item-content">',' '))
-                                        inf = inf.replace('strong','').replace('/', '').replace('<>', '')
-                                        print(inf[:inf.find('Браузер')])
+                                        inf = x[p:x.find('Регион в Яндекс.Паспорте', p)] #if region is not None: print(region[0][:-12].replace('</div><span class="data__item-content">',' '))
+                                        print(''.join(re.split('<[\/\!]*?[^<>]*?>', inf))[:-1]) #inf = inf.replace('strong','').replace('/', '').replace('<>', '')
                                         return(0)
                                 elif r("g"):
                                         s = cin()
@@ -929,7 +929,7 @@ def messaging():
                         out_flag = l(m[-1])=='#'
                         if out_flag: m=m[:-1]
                         print(len(m))
-                        if len(m)>348:
+                        if len(m)>TOO_LONG_CONSTANT:
                                 print("C'mon, do I really interested in that? Better ask me how am I.\n[or all is well?]")
                                 confirmation = cin()
                                 if confirmation is None or l(confirmation)!="all is well":
@@ -964,7 +964,7 @@ def check_inbox():
         prev_token_num = token_num
         for token_num in range(len(token_list)): #if random.random() > prob[token_num]: continue
                 myname = name_from_id(idscache[token_num])
-                viewed_time = lastNviewcache[token_num]# - 2000000
+                viewed_time = lastNviewcache[token_num]# - 3600
                 notif_resp, resp = None, None
                 tn = token_num<<1
                 if (prob[tn+1]==0 and prob[tn]==0): continue
@@ -1029,7 +1029,7 @@ def check_inbox():
                         printsn(printtime(xdate))
                         if not looping: printms()
         token_num = prev_token_num
-        return(A) #messages+notifies of all tokens
+        return(A) #messages + notifies of all tokens
 def main():
         global printm, waitTime, looping, lastNviewcache
         start(), read_mnemonics(), read_ignore(), read_header(), getcache()
