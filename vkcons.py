@@ -415,7 +415,7 @@ def messaging():
                                         if s.strip(' \n\t[]')[0].isdigit(): forward_messages += ',' + re.sub('\[(.*?)\]', r'\1', s)
                                         elif l(s[0])=='s': 
                                                 subject = s[1:].strip() #s The subject of my message
-                                                print(help("subj1") + subject + help("subj2"))
+                                                if not hide: print(help("subj1") + subject + help("subj2"))
                                         else: attachments += ',' + s.replace(' ','')
                                         continue
                                 if r("~") or r("`"):
@@ -1056,7 +1056,7 @@ def messaging():
                                 call_api('messages.send', {'peer_id': userid, 'message': m[:lastn], 'attachment': attachments, 'forward_messages': forward_messages, 'title': subject})
                                 m = m[lastn:]
                         call_api('messages.send', {'peer_id': userid, 'message': m, 'attachment': attachments, 'forward_messages': forward_messages, 'title': subject})
-                        print(printm+m+'\n'+printtime(time.time()))
+                        print(printm+int(subject is not None)*('\n['+str(subject)+']')+m+'\n'*(len(attachments)>1)+attachments[1:]+'\n'*(len(forward_messages)>1)+forward_messages[1:]+'\n'+printtime(time.time()))
                         printm = ''
                         if out_flag: return(-1)
         return(0)
