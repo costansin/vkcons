@@ -107,6 +107,7 @@ def getcache():
                         s = cin()
                         if l(s)=='y': reset()
 def getcached(uid):
+        if uid is None: return 0
         global uidscache
         result = uidscache.get(uid)
         if result is None:
