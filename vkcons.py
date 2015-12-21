@@ -826,7 +826,6 @@ def messaging():
                                         if vktrim+1: s = s[vktrim+7:]
                                         suserid = ','.join([str(mn(x)) for x in s.split(',')])
                                         if 'None' in suserid: suserid = l(s)
-                                        print(suserid)
                                         info = call_api('users.get', {'user_ids': suserid, 'fields': fields})
                                         if info:
                                                 for user in info:
