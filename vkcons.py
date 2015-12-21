@@ -43,7 +43,7 @@ def call_api(method, params):
         while True:
                 try:
                         E = False
-                        timeout = None if files else 0.5
+                        timeout = None if files else len(str(params))/266
                         try: result = requests.post(url, data=params, files=files, timeout=timeout)
                         except KeyboardInterrupt: return
                         result = result.json()
