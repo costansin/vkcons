@@ -189,7 +189,7 @@ def name_from_id(uid):
                 return name + '('+'-'*(uid<0)+str(cachedid.get('id', ''))+')'
         else: return '0'
 def iam():
-        if idscache: print('\n'+name_from_id(idscache[token_num])+' to '+name_from_id(prevuserid)+':')
+        if idscache: print('\n'+name_from_id(idscache[token_num])+(' '+'>'+' '+name_from_id(prevuserid))*(prevuserid != idscache[token_num])+':')
 def photolink(photo):
         for size in photosizes:
                 link=photo.get('photo_'+str(size))
