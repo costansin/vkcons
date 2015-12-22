@@ -659,7 +659,7 @@ def messaging():
                                                 ofname = 'file'+(s+'A')[s.rfind('.'):s.rfind('?')]
                                                 if owget:
                                                         wget_filename = 'opwget.bat'
-                                                        with open(wget_filename, 'w', encoding='utf-8') as wget_file: wget_file.write('chcp 65001\nwget ' + s + ' -O "' + ofname + '"\nDel %0 /q\n')
+                                                        with open(wget_filename, 'w', encoding='utf-8') as wget_file: wget_file.write('chcp 65001\nwget ' + s + ' --no-check-certificate -O "' + ofname + '"\nDel %0 /q\n')
                                                         os.system(wget_filename)
                                                 else:
                                                         with open(ofname, 'wb') as f: f.write(requests.get(s).content)
