@@ -701,13 +701,23 @@ def messaging():
                                                 aur = auresplist[0]
                                                 for x in aur: print(x, aur[x], sep='\t\t')
                                         elif s.startswith('video'):
-                                                xvoid, xvid = s[s.find('video')+5:].split('_')
+                                                s = s[s.find('video')+5:]
+                                                xvoid, xvid, *rest = s.split('_')
                                                 x = requests.get('https://vk.com/video.php?act=a_flash_vars&vid='+xvoid+'_'+xvid).text
                                                 try: video_max_hd = int(x[x.find('"hd":')+5])
                                                 except: video_max_hd = 0
                                                 vurlfind = x.find('url'+hds[video_max_hd])+9
                                                 video_url = x[vurlfind:x.find('?extra', vurlfind)].replace('\/', '/')
-                                                print(video_url)                                                                
+                                                if video_url: print(video_url)
+                                                else:
+                                                        api_call = call_api('video.get', {'videos': s})
+                                                        if api_call:
+                                                                vid = api_call.get('items')
+                                                                if vid:
+                                                                        v = vid[0]
+                                                                        if v.get('is_private'): print('ADULT_CONTENT') #or just private?
+                                                                        s = v.get('player')
+                                                                        print(s)
                                         else:
                                                 print(help("x")[1])
                                         return(0)
