@@ -438,7 +438,7 @@ def messaging():
                                                 print(help("`"))
                                                 s = cin()
                                                 if s is None: return(0)
-                                        history_filter = s
+                                        history_filter = l(s)
                                         continue
                                 elif r("n"):
                                         call_api('notifications.markAsViewed', {})
