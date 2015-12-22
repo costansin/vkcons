@@ -303,7 +303,7 @@ def ask_confirmation(helpindex):
 def messaging():
         global token_num, printm, waitTime, prevuserid, block, lang, TOO_LONG_CONSTANT, hide, header, history_filter
         iam()
-        m, s, attachments, forward_messages, userid, wall_flag, wall_edit_flag, subject, delay_time, history_filter = '', '', '', '', None, False, False, None, None, None
+        m, s, attachments, forward_messages, userid, wall_flag, wall_edit_flag, subject, delay_time, history_filter, repeated = '', '', '', '', None, False, False, None, None, None, False
         check_delayed()
         while (s=='')or(l(s[-1])!='#'):
                 s = cin()
