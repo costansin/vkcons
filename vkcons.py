@@ -9,7 +9,7 @@ helpinfo = {'?': ['% - эээ, а можно по-русски?\nto get user/gro
 def help(index): return helpinfo[index][lang]
 def flex(i): #russian case with numerals
         if not lang: return int(abs(i)==1)
-        t = divmod((i+89)%100, 10)
+        t = divmod((abs(i)+89)%100, 10)
         return int(bool(t[0]))*int(bool(t[1])+1)*int(t[1]<4)
 def start():
         for x in mnemofile, ignorefile, tokenfile, raspyafile, cachefile, headerfile, delayfile:
