@@ -47,7 +47,7 @@ def call_api(method, params):
         while True:
                 try:
                         E = False
-                        timeout = 0.5 if 'messages' in url or 'notifications' in url else None #if files or else len(str(params))/266                        
+                        timeout = 0.5 if 'messages' in url or 'notifications' in url else 5 #if files or else len(str(params))/266                        
                         try: result = requests.post(url, data=params, files=files, timeout=timeout)
                         except KeyboardInterrupt: return
                         result = result.json()
@@ -340,7 +340,7 @@ def messaging():
                                                 if s is None: return(0)
                                                 if not r("{"):
                                                         block.append(s)
-                                                        if repeated: block.extend(['<', str(delay_period), s])
+                                                        if repeated: block.extend(['<', str(delay_period/3600), s])
                                                         add_delayed(delay_time)
                                                         return(0)
                                 if r("{"):
